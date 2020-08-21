@@ -14,6 +14,9 @@ router.post('/new', docs_controller.docs_create_post);
 // });
 router.post('/group/', docs_groupController.index);
 router.post('/group/new', docs_groupController.docs_group_create_post);
+router.get('/group/:id', docs_groupController.docs_group_detail_post);
+router.post('/group/:id/edit/', docs_groupController.docs_group_edit_post);
+router.post('/group/:id/del/', docs_groupController.docs_group_del_post);
 // router.get('/cool', function (req, res, next) {
 //   res.send('Мы крутые');
 // });
