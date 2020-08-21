@@ -24,7 +24,7 @@ module.exports = {
       }
       let check = await bcrypt.compare(myPlaintextPassword, user.user_password);
       if (check) {
-        let token = jwt.sign({ id: db.User.id }, tokenKey);
+        let token = jwt.sign({ id: user.id }, tokenKey);
         const [dbuser, created] = await db.User_session.findOrCreate({
           where: {
             userId: user.id,
@@ -67,24 +67,30 @@ module.exports = {
 
     //TODO сделать эту проверку
     //   const token = authHeader && authHeader.split(" ")[1];
-
     if (req.headers.authorization) {
       jwt.verify(req.headers.authorization.split(' ')[1], tokenKey, (err, payload) => {
+
         if (err) next()
         else if (payload) {
-          for (let user of users) {
+          //TODO нет смысла делать постоянный запрос к БД имея токен, т.к. при проверке токена получаешь айди 
+          db.User.findOne({
+            where: {
+              user_login: req.body.login
+            }
+          }).then((user) => {
             if (user.id === payload.id) {
               req.user = user
               next()
+            } else {
+              next()
             }
-          }
-
-          if (!req.user) next()
+          }).catch((err) => {
+            if (!req.user) next()
+          });
         }
       })
     }
 
-    next()
   },
   async authReg(login, password) {
     try {

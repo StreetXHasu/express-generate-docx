@@ -1,9 +1,11 @@
+const db = require('../models');
 const Docs = require('../models/docs');
-const docx = require('docx');
 const Docs_group = require('../models/docs_group');
 const User = require('../models/user');
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
+
+const docx = require('docx');
 const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun, UnderlineType } = docx;
 
 //список документов
@@ -13,102 +15,149 @@ exports.index = function (req, res) {
     res.render('auth_login', { title: 'Авторизация' });
 }
 exports.docs_create_post = async function (req, res) {
-    const doc = new Document({
-        creator: "Clippy",
-        title: "Sample Document",
-        description: "A brief example of using docx",
-        styles: {
-            paragraphStyles: [
-                {
-                    id: "Heading1",
-                    name: "Heading 1",
-                    basedOn: "Normal",
-                    next: "Normal",
-                    quickFormat: true,
-                    run: {
-                        size: 28,
-                        bold: true,
-                        italics: true,
-                        color: "red",
-                    },
-                    paragraph: {
-                        spacing: {
-                            after: 120,
+    try {
+
+        let doc_user = 1;
+        let doc_group = 1;
+
+        let doc_name = req.body.doc.name;
+        let doc_disc = req.body.doc.disc;
+        let doc_format = "docx";
+        let doc_pin = 0;
+        let doc_hide = 0;
+        let doc_data = {
+            creator: "Clippy",
+            title: "Sample Document",
+            description: "A brief example of using docx",
+            styles: {
+                paragraphStyles: [
+                    {
+                        id: "Heading1",
+                        name: "Heading 1",
+                        basedOn: "Normal",
+                        next: "Normal",
+                        quickFormat: true,
+                        run: {
+                            size: 28,
+                            bold: true,
+                            italics: true,
+                            color: "red",
+                        },
+                        paragraph: {
+                            spacing: {
+                                after: 120,
+                            },
                         },
                     },
-                },
-                {
-                    id: "Heading2",
-                    name: "Heading 2",
-                    basedOn: "Normal",
-                    next: "Normal",
-                    quickFormat: true,
-                    run: {
-                        size: 26,
-                        bold: true,
-                        underline: {
-                            type: UnderlineType.DOUBLE,
-                            color: "FF0000",
+                    {
+                        id: "Heading2",
+                        name: "Heading 2",
+                        basedOn: "Normal",
+                        next: "Normal",
+                        quickFormat: true,
+                        run: {
+                            size: 26,
+                            bold: true,
+                            underline: {
+                                type: UnderlineType.DOUBLE,
+                                color: "FF0000",
+                            },
+                        },
+                        paragraph: {
+                            spacing: {
+                                before: 240,
+                                after: 120,
+                            },
                         },
                     },
-                    paragraph: {
-                        spacing: {
-                            before: 240,
-                            after: 120,
+                    {
+                        id: "aside",
+                        name: "Aside",
+                        basedOn: "Normal",
+                        next: "Normal",
+                        run: {
+                            color: "999999",
+                            italics: true,
+                        },
+                        paragraph: {
+                            indent: {
+                                left: 720,
+                            },
+                            spacing: {
+                                line: 276,
+                            },
                         },
                     },
-                },
-                {
-                    id: "aside",
-                    name: "Aside",
-                    basedOn: "Normal",
-                    next: "Normal",
-                    run: {
-                        color: "999999",
-                        italics: true,
-                    },
-                    paragraph: {
-                        indent: {
-                            left: 720,
-                        },
-                        spacing: {
-                            line: 276,
+                    {
+                        id: "wellSpaced",
+                        name: "Well Spaced",
+                        basedOn: "Normal",
+                        quickFormat: true,
+                        paragraph: {
+                            spacing: { line: 276, before: 20 * 72 * 0.1, after: 20 * 72 * 0.05 },
                         },
                     },
-                },
-                {
-                    id: "wellSpaced",
-                    name: "Well Spaced",
-                    basedOn: "Normal",
-                    quickFormat: true,
-                    paragraph: {
-                        spacing: { line: 276, before: 20 * 72 * 0.1, after: 20 * 72 * 0.05 },
+                    {
+                        id: "ListParagraph",
+                        name: "List Paragraph",
+                        basedOn: "Normal",
+                        quickFormat: true,
                     },
-                },
-                {
-                    id: "ListParagraph",
-                    name: "List Paragraph",
-                    basedOn: "Normal",
-                    quickFormat: true,
-                },
-            ],
-        },
-        numbering: {
-            config: [
-                {
-                    reference: "my-crazy-numbering",
-                    levels: [
-                        {
-                            level: 0,
-                            format: "lowerLetter",
-                            text: "%1)",
-                            alignment: AlignmentType.LEFT,
-                        },
-                    ],
-                },
-            ],
-        },
-    });
+                ],
+            },
+            numbering: {
+                config: [
+                    {
+                        reference: "my-crazy-numbering",
+                        levels: [
+                            {
+                                level: 0,
+                                format: "lowerLetter",
+                                text: "%1)",
+                                alignment: AlignmentType.LEFT,
+                            },
+                        ],
+                    },
+                ],
+            },
+        }
+
+
+
+        // userId: DataTypes.INTEGER,
+        // docs_groupId: DataTypes.INTEGER,
+        // name: DataTypes.STRING,
+        // disc: DataTypes.TEXT,
+        // data: DataTypes.TEXT,
+        // format: DataTypes.STRING,
+        // pin: DataTypes.INTEGER,
+        // hide: DataTypes.INTEGER
+        const [doc, created] = await db.Docs.findOrCreate({
+            where: {
+                userId: doc_user,
+                docs_groupId: doc_group,
+                name: doc_name,
+            },
+            defaults: {
+                disc: doc_disc,
+                data: JSON.stringify(doc_data),
+                format: doc_format,
+                pin: doc_pin,
+                hide: doc_hide,
+            }
+        })
+        let success = `Документ ${doc.name} уже есть.`;
+        if (created) {
+            success = `Документ ${doc.name} создана!`; // This will certainly be 'Technical Lead JavaScript'
+        }
+        return res.json({
+            success,
+            doc,
+        })
+    } catch (error) {
+        console.log(error);
+    }
+    const doc = new Document(doc_data);
 
     doc.addSection({
         children: [

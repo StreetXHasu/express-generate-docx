@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const docs_controller = require('../controllers/docsController');
+const docs_groupController = require('../controllers/docs_groupController');
 // Требующиеся модули контроллеров.
 router.post('/', docs_controller.index);
 // router.get('/cool', function (req, res, next) {
@@ -8,6 +9,11 @@ router.post('/', docs_controller.index);
 // });
 
 router.post('/new', docs_controller.docs_create_post);
+// router.get('/cool', function (req, res, next) {
+//   res.send('Мы крутые');
+// });
+router.post('/group/', docs_groupController.index);
+router.post('/group/new', docs_groupController.docs_group_create_post);
 // router.get('/cool', function (req, res, next) {
 //   res.send('Мы крутые');
 // });
