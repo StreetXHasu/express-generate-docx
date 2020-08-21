@@ -1,0 +1,3 @@
+npx sequelize-cli model:generate --name Docs --attributes userId:INTEGER,docs_groupId:INTEGER,name:string,disc:TEXT,data:TEXT,format:string,pin:INTEGER,hide:INTEGER 
+
+npx sequelize-cli model:generate --name Docs_group --attributes name:string,disc:TEXT,img:string
