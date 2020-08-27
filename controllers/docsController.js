@@ -9,10 +9,10 @@ const docx = require('docx');
 const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun, UnderlineType } = docx;
 
 //список документов
-exports.index = function (req, res, next) {
-    // const docs = await db.Docs.findAll({ limit: 10 });
+exports.index = async function (req, res, next) {
+     const docs = await db.Docs.findAll({ limit: 10 });
 
-    res.json({ msg: "Список групп документов" });
+    res.json({ msg: "Список групп документов",docs });
     return;
     res.render('auth_login', { title: 'Авторизация' });
 }

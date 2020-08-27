@@ -67,9 +67,11 @@ module.exports = {
 
     //TODO сделать эту проверку
     //   const token = authHeader && authHeader.split(" ")[1];
+    
     if (req.headers.authorization) {
+      
       jwt.verify(req.headers.authorization.split(' ')[1], tokenKey, (err, payload) => {
-
+        
         if (err) next()
         else if (payload) {
           //TODO нет смысла делать постоянный запрос к БД имея токен, т.к. при проверке токена получаешь айди 
@@ -90,7 +92,7 @@ module.exports = {
         }
       })
     }
-
+    if (!req.user) next()
   },
   async authReg(login, password) {
     try {
