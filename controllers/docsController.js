@@ -9,14 +9,14 @@ const docx = require('docx');
 const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun, UnderlineType } = docx;
 
 //список документов
-exports.index = async function (req, res) {
-    const docs = await db.Docs.findAll({ limit: 10 });
+exports.index = function (req, res, next) {
+    // const docs = await db.Docs.findAll({ limit: 10 });
 
-    res.json({ msg: "Список групп документов", docs });
+    res.json({ msg: "Список групп документов" });
     return;
     res.render('auth_login', { title: 'Авторизация' });
 }
-exports.docs_create_post = async function (req, res) {
+exports.docs_create_post = async function (req, res, next) {
     try {
 
         let doc_user = 1;
@@ -134,7 +134,7 @@ exports.docs_create_post = async function (req, res) {
         // format: DataTypes.STRING,
         // pin: DataTypes.INTEGER,
         // hide: DataTypes.INTEGER
-        const [doc, created] = await db.Docs.findOrCreate({
+        const [docs, created] = await db.Docs.findOrCreate({
             where: {
                 userId: doc_user,
                 docs_groupId: doc_group,
@@ -142,156 +142,171 @@ exports.docs_create_post = async function (req, res) {
             },
             defaults: {
                 disc: doc_disc,
-                data: JSON.stringify(doc_data),
+                data: '',
                 format: doc_format,
                 pin: doc_pin,
                 hide: doc_hide,
             }
         })
-        let success = `Документ ${doc.name} уже есть.`;
+        let success = `Документ ${docs.name} уже есть.`;
         if (created) {
-            success = `Документ ${doc.name} создана!`; // This will certainly be 'Technical Lead JavaScript'
+            success = `Документ ${docs.name} создана!`; // This will certainly be 'Technical Lead JavaScript'
         }
+
+        return res.json({
+            success,
+            doc: docs
+        })
+
+        doc = new Document(doc_data);
+
+        doc.addSection({
+            children: [
+                new Paragraph({
+                    text: "Test heading1, bold and italicized",
+                    heading: HeadingLevel.HEADING_1,
+                }),
+                new Paragraph("Some simple content"),
+                new Paragraph({
+                    text: "Test heading2 with double red underline",
+                    heading: HeadingLevel.HEADING_2,
+                }),
+                new Paragraph({
+                    text: "Option1",
+                    numbering: {
+                        reference: "my-crazy-numbering",
+                        level: 0,
+                    },
+                }),
+                new Paragraph({
+                    text: "Option5 -- override 2 to 5",
+                    numbering: {
+                        reference: "my-crazy-numbering",
+                        level: 0,
+                    },
+                }),
+                new Paragraph({
+                    text: "Option3",
+                    numbering: {
+                        reference: "my-crazy-numbering",
+                        level: 0,
+                    },
+                }),
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: "Some monospaced content",
+                            font: {
+                                name: "Monospace",
+                            },
+                        }),
+                    ],
+                }),
+                new Paragraph({
+                    text: "An aside, in light gray italics and indented",
+                    style: "aside",
+                }),
+                new Paragraph({
+                    text: "This is normal, but well-spaced text",
+                    style: "wellSpaced",
+                }),
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: "This is a bold run,",
+                            bold: true,
+                        }),
+                        new TextRun(" switching to normal "),
+                        new TextRun({
+                            text: "and then underlined ",
+                            underline: {},
+                        }),
+                        new TextRun({
+                            text: "and back to normal.",
+                        }),
+                    ],
+                }),
+            ],
+        });
+
+        const b64string = await Packer.toBase64String(doc);
+
+        res.setHeader('Content-Disposition', 'attachment; filename=My Document.docx');
+        res.send(Buffer.from(b64string, 'base64'));
+        return
+        res.json({ msg: "Новый документ", user: req.body });
+        return;
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+
+            // There are errors. Render form again with sanitized values/errors messages.
+            res.json({ msg: "ошибка", user: req.body, errors: errors.array() });
+            return;
+        }
+        else {
+
+            // Data from form is valid.
+
+            // Create an Author object with escaped and trimmed data.
+            Auth.authReg(req.body.login, req.body.password)
+
+        }
+    } catch (error) {
+        console.log(error);
+        next(error)
+
+    }
+}
+exports.docs_detail_post = async function (req, res, next) {
+
+    try {
+        console.log(`asdad asdasda`, req.params.id)
+        let doc = await db.Docs.findOne({ where: { id: req.params.id } });
+        let success = `Документ ${doc.name}.`;
         return res.json({
             success,
             doc,
         })
-    } catch (error) {
-        console.log(error);
+    } catch (err) {
+        err.status = 404;
+        return next(err);
     }
-    const doc = new Document(doc_data);
-
-    doc.addSection({
-        children: [
-            new Paragraph({
-                text: "Test heading1, bold and italicized",
-                heading: HeadingLevel.HEADING_1,
-            }),
-            new Paragraph("Some simple content"),
-            new Paragraph({
-                text: "Test heading2 with double red underline",
-                heading: HeadingLevel.HEADING_2,
-            }),
-            new Paragraph({
-                text: "Option1",
-                numbering: {
-                    reference: "my-crazy-numbering",
-                    level: 0,
-                },
-            }),
-            new Paragraph({
-                text: "Option5 -- override 2 to 5",
-                numbering: {
-                    reference: "my-crazy-numbering",
-                    level: 0,
-                },
-            }),
-            new Paragraph({
-                text: "Option3",
-                numbering: {
-                    reference: "my-crazy-numbering",
-                    level: 0,
-                },
-            }),
-            new Paragraph({
-                children: [
-                    new TextRun({
-                        text: "Some monospaced content",
-                        font: {
-                            name: "Monospace",
-                        },
-                    }),
-                ],
-            }),
-            new Paragraph({
-                text: "An aside, in light gray italics and indented",
-                style: "aside",
-            }),
-            new Paragraph({
-                text: "This is normal, but well-spaced text",
-                style: "wellSpaced",
-            }),
-            new Paragraph({
-                children: [
-                    new TextRun({
-                        text: "This is a bold run,",
-                        bold: true,
-                    }),
-                    new TextRun(" switching to normal "),
-                    new TextRun({
-                        text: "and then underlined ",
-                        underline: {},
-                    }),
-                    new TextRun({
-                        text: "and back to normal.",
-                    }),
-                ],
-            }),
-        ],
-    });
-
-    const b64string = await Packer.toBase64String(doc);
-
-    res.setHeader('Content-Disposition', 'attachment; filename=My Document.docx');
-    res.send(Buffer.from(b64string, 'base64'));
-    return
-    res.json({ msg: "Новый документ", user: req.body });
-    return;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-
-        // There are errors. Render form again with sanitized values/errors messages.
-        res.json({ msg: "ошибка", user: req.body, errors: errors.array() });
-        return;
-    }
-    else {
-
-        // Data from form is valid.
-
-        // Create an Author object with escaped and trimmed data.
-        Auth.authReg(req.body.login, req.body.password)
-
-    }
-
-    res.json({ msg: "готово" });
 }
-exports.docs_edit_post = function (req, res) {
+exports.docs_edit_post = async function (req, res, next) {
+    let doc_name = req.body.doc.name;
+    let doc_disc = req.body.doc.disc;
+    let doc_img = req.body.doc.img;
+    try {
+        let doc = await db.Docs.findOne({ where: { id: req.params.id } });
+        doc.name = doc_name;
+        doc.disc = doc_disc;
+        if (doc_img) {
+            doc.img = doc_img;
+        }
+        doc.save();
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-
-        // There are errors. Render form again with sanitized values/errors messages.
-        res.json({ msg: "ошибка", user: req.body, errors: errors.array() });
-        return;
+        let success = `Документ ${doc.id} изменена!.`;
+        return res.json({
+            success,
+            doc,
+        })
+    } catch (err) {
+        err.status = 404;
+        return next(err);
     }
-    else {
-
-        // Data from form is valid.
-
-        // Create an Author object with escaped and trimmed data.
-        Auth.authReg(req.body.login, req.body.password)
-
-    }
-
-    res.json({ msg: "готово" });
 }
-exports.docs_del_post = function (req, res) {
+exports.docs_del_post = async function (req, res, next) {
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-
-        // There are errors. Render form again with sanitized values/errors messages.
-        res.json({ msg: "ошибка", user: req.body, errors: errors.array() });
-        return;
+    try {
+        let doc = await db.Docs.findOne({ where: { id: req.params.id } });
+        doc.destroy();
+        let success = `Документ ${doc.name} удалена!.`;
+        return res.json({
+            success,
+            doc,
+        })
+    } catch (err) {
+        err.status = 404;
+        return next(err);
     }
-    else {
-
-        // Data from form is valid.
-
-        // Create an Author object with escaped and trimmed data.
-        Auth.authReg(req.body.login, req.body.password)
-
-    }
-
-    res.json({ msg: "готово" });
 }

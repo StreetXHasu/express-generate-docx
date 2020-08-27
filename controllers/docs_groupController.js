@@ -9,14 +9,14 @@ const docx = require('docx');
 const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun, UnderlineType } = docx;
 
 //список групп докментов
-exports.index = async function (req, res) {
+exports.index = async function (req, res, next) {
     const docs = await db.Docs_group.findAll({ limit: 10 });
 
     res.json({ msg: "Список групп документов", docs });
     return;
     res.render('auth_login', { title: 'Авторизация' });
 }
-exports.docs_group_create_post = async function (req, res) {
+exports.docs_group_create_post = async function (req, res, next) {
 
     try {
         let doc_name = req.body.doc.name;
@@ -40,44 +40,53 @@ exports.docs_group_create_post = async function (req, res) {
             success,
             doc,
         })
-    } catch (error) {
-
+    } catch (err) {
+        err.status = 404;
+        return next(err);
     }
 
 
     return
 }
-exports.docs_group_detail_post = async function (req, res) {
+exports.docs_group_detail_post = async function (req, res, next) {
 
     try {
+        console.log("ТЕСТ   ", req.params.id)
         let doc_group = await db.Docs_group.findOne({ where: { id: req.params.id } });
         let success = `Группа ${doc_group.name}.`;
         return res.json({
             success,
             doc_group,
         })
-    } catch (error) {
-
+    } catch (err) {
+        err.status = 404;
+        return next(err);
     }
 }
-exports.docs_group_edit_post = async function (req, res) {
-
+exports.docs_group_edit_post = async function (req, res, next) {
+    let doc_name = req.body.doc.name;
+    let doc_disc = req.body.doc.disc;
+    let doc_img = req.body.doc.img;
     try {
-        // let doc_group = await db.Docs_group.findOne({ where: { id: req.params.id } });
-        // doc_group.destroy();
-        // let success = `Группа ${doc_group.name} удалена!.`;
-        // return res.json({
-        //     success,
-        //     doc_group,
-        // })
-        return res.json({
-            success: "потом будет",
-        })
-    } catch (error) {
+        let doc_group = await db.Docs_group.findOne({ where: { id: req.params.id } });
+        doc_group.name = doc_name;
+        doc_group.disc = doc_disc;
+        if (doc_img) {
+            doc_group.img = doc_img;
+        }
+        doc_group.save();
 
+        let success = `Группа ${doc_group.id} изменена!.`;
+        return res.json({
+            success,
+            doc_group,
+        })
+    } catch (err) {
+        err.status = 404;
+        return next(err);
     }
 }
-exports.docs_group_del_post = async function (req, res) {
+exports.docs_group_del_post = async function (req, res, next) {
 
     try {
         let doc_group = await db.Docs_group.findOne({ where: { id: req.params.id } });
@@ -87,7 +96,8 @@ exports.docs_group_del_post = async function (req, res) {
             success,
             doc_group,
         })
-    } catch (error) {
-
+    } catch (err) {
+        err.status = 404;
+        return next(err);
     }
 }

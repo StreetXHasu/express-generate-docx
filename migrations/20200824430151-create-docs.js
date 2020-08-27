@@ -21,7 +21,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         onDelete: 'NO ACTION',
         references: {
-          model: 'Docs',
+          model: 'Docs_groups',
           key: 'id',
           as: 'docs_groupId',
         },
