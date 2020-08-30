@@ -1,20 +1,46 @@
 const db = require('../models');
-const Docs = require('../models/docs');
-const Docs_group = require('../models/docs_group');
-const User = require('../models/user');
-const { body, validationResult } = require('express-validator/check');
-const { sanitizeBody } = require('express-validator/filter');
+
+
+const {
+    body,
+    validationResult
+} = require('express-validator');
 
 const docx = require('docx');
-const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun, UnderlineType } = docx;
+const {
+    AlignmentType,
+    Document,
+    HeadingLevel,
+    Packer,
+    Paragraph,
+    TextRun,
+    UnderlineType
+} = docx;
 
 //список документов
 exports.index = async function (req, res, next) {
-     const docs = await db.Docs.findAll({ limit: 10 });
+    try {
+        if (req.user) {
+            const docs = await db.Docs.findAll({
+                limit: 10
+            });
 
-    res.json({ msg: "Список групп документов",docs });
-    return;
-    res.render('auth_login', { title: 'Авторизация' });
+            return res.status(200).json({
+                user: req.user,
+                msg: "Список групп документов",
+                docs,
+
+            });
+        } else return res.status(200).json({
+            msg: 'Not authorized'
+        })
+        return;
+        res.render('auth_login', {
+            title: 'Авторизация'
+        });
+    } catch (error) {
+        return res.status(401).json(error);
+    }
 }
 exports.docs_create_post = async function (req, res, next) {
     try {
@@ -32,95 +58,94 @@ exports.docs_create_post = async function (req, res, next) {
             title: "Sample Document",
             description: "A brief example of using docx",
             styles: {
-                paragraphStyles: [
-                    {
-                        id: "Heading1",
-                        name: "Heading 1",
-                        basedOn: "Normal",
-                        next: "Normal",
-                        quickFormat: true,
-                        run: {
-                            size: 28,
-                            bold: true,
-                            italics: true,
-                            color: "red",
-                        },
-                        paragraph: {
-                            spacing: {
-                                after: 120,
-                            },
+                paragraphStyles: [{
+                    id: "Heading1",
+                    name: "Heading 1",
+                    basedOn: "Normal",
+                    next: "Normal",
+                    quickFormat: true,
+                    run: {
+                        size: 28,
+                        bold: true,
+                        italics: true,
+                        color: "red",
+                    },
+                    paragraph: {
+                        spacing: {
+                            after: 120,
                         },
                     },
-                    {
-                        id: "Heading2",
-                        name: "Heading 2",
-                        basedOn: "Normal",
-                        next: "Normal",
-                        quickFormat: true,
-                        run: {
-                            size: 26,
-                            bold: true,
-                            underline: {
-                                type: UnderlineType.DOUBLE,
-                                color: "FF0000",
-                            },
-                        },
-                        paragraph: {
-                            spacing: {
-                                before: 240,
-                                after: 120,
-                            },
+                },
+                {
+                    id: "Heading2",
+                    name: "Heading 2",
+                    basedOn: "Normal",
+                    next: "Normal",
+                    quickFormat: true,
+                    run: {
+                        size: 26,
+                        bold: true,
+                        underline: {
+                            type: UnderlineType.DOUBLE,
+                            color: "FF0000",
                         },
                     },
-                    {
-                        id: "aside",
-                        name: "Aside",
-                        basedOn: "Normal",
-                        next: "Normal",
-                        run: {
-                            color: "999999",
-                            italics: true,
-                        },
-                        paragraph: {
-                            indent: {
-                                left: 720,
-                            },
-                            spacing: {
-                                line: 276,
-                            },
+                    paragraph: {
+                        spacing: {
+                            before: 240,
+                            after: 120,
                         },
                     },
-                    {
-                        id: "wellSpaced",
-                        name: "Well Spaced",
-                        basedOn: "Normal",
-                        quickFormat: true,
-                        paragraph: {
-                            spacing: { line: 276, before: 20 * 72 * 0.1, after: 20 * 72 * 0.05 },
+                },
+                {
+                    id: "aside",
+                    name: "Aside",
+                    basedOn: "Normal",
+                    next: "Normal",
+                    run: {
+                        color: "999999",
+                        italics: true,
+                    },
+                    paragraph: {
+                        indent: {
+                            left: 720,
+                        },
+                        spacing: {
+                            line: 276,
                         },
                     },
-                    {
-                        id: "ListParagraph",
-                        name: "List Paragraph",
-                        basedOn: "Normal",
-                        quickFormat: true,
+                },
+                {
+                    id: "wellSpaced",
+                    name: "Well Spaced",
+                    basedOn: "Normal",
+                    quickFormat: true,
+                    paragraph: {
+                        spacing: {
+                            line: 276,
+                            before: 20 * 72 * 0.1,
+                            after: 20 * 72 * 0.05
+                        },
                     },
+                },
+                {
+                    id: "ListParagraph",
+                    name: "List Paragraph",
+                    basedOn: "Normal",
+                    quickFormat: true,
+                },
                 ],
             },
             numbering: {
-                config: [
-                    {
-                        reference: "my-crazy-numbering",
-                        levels: [
-                            {
-                                level: 0,
-                                format: "lowerLetter",
-                                text: "%1)",
-                                alignment: AlignmentType.LEFT,
-                            },
-                        ],
-                    },
-                ],
+                config: [{
+                    reference: "my-crazy-numbering",
+                    levels: [{
+                        level: 0,
+                        format: "lowerLetter",
+                        text: "%1)",
+                        alignment: AlignmentType.LEFT,
+                    },],
+                },],
             },
         }
 
@@ -234,16 +259,22 @@ exports.docs_create_post = async function (req, res, next) {
         res.setHeader('Content-Disposition', 'attachment; filename=My Document.docx');
         res.send(Buffer.from(b64string, 'base64'));
         return
-        res.json({ msg: "Новый документ", user: req.body });
+        res.json({
+            msg: "Новый документ",
+            user: req.body
+        });
         return;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
 
             // There are errors. Render form again with sanitized values/errors messages.
-            res.json({ msg: "ошибка", user: req.body, errors: errors.array() });
+            res.json({
+                msg: "ошибка",
+                user: req.body,
+                errors: errors.array()
+            });
             return;
-        }
-        else {
+        } else {
 
             // Data from form is valid.
 
@@ -258,15 +289,20 @@ exports.docs_create_post = async function (req, res, next) {
     }
 }
 exports.docs_detail_post = async function (req, res, next) {
-
+    return next();
     try {
-        console.log(`asdad asdasda`, req.params.id)
-        let doc = await db.Docs.findOne({ where: { id: req.params.id } });
-        let success = `Документ ${doc.name}.`;
-        return res.json({
-            success,
-            doc,
-        })
+        let doc = await db.Docs.findOne({
+            where: {
+                id: req.params.id
+            }
+        });
+        if (doc) {
+            let success = `Документ ${doc.name}.`;
+            return res.json({
+                success,
+                doc,
+            })
+        }
     } catch (err) {
         err.status = 404;
         return next(err);
@@ -277,7 +313,11 @@ exports.docs_edit_post = async function (req, res, next) {
     let doc_disc = req.body.doc.disc;
     let doc_img = req.body.doc.img;
     try {
-        let doc = await db.Docs.findOne({ where: { id: req.params.id } });
+        let doc = await db.Docs.findOne({
+            where: {
+                id: req.params.id
+            }
+        });
         doc.name = doc_name;
         doc.disc = doc_disc;
         if (doc_img) {
@@ -298,7 +338,11 @@ exports.docs_edit_post = async function (req, res, next) {
 exports.docs_del_post = async function (req, res, next) {
 
     try {
-        let doc = await db.Docs.findOne({ where: { id: req.params.id } });
+        let doc = await db.Docs.findOne({
+            where: {
+                id: req.params.id
+            }
+        });
         doc.destroy();
         let success = `Документ ${doc.name} удалена!.`;
         return res.json({

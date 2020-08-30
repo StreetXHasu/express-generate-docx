@@ -20,11 +20,15 @@ module.exports = {
         }
       })
       if (!user) {
-        return res.status(404).json({ message: 'User not found' })
+        return res.status(200).json({
+          msg: 'User not found'
+        })
       }
       let check = await bcrypt.compare(myPlaintextPassword, user.user_password);
       if (check) {
-        let token = jwt.sign({ id: user.id }, tokenKey);
+        let token = jwt.sign({
+          id: user.id
+        }, tokenKey);
         const [dbuser, created] = await db.User_session.findOrCreate({
           where: {
             userId: user.id,
@@ -60,39 +64,39 @@ module.exports = {
       console.log(error)
 
     }
-    return res.status(404).json({ message: 'User not found' })
+    return res.status(404).json({
+      message: 'User not found'
+    })
   },
 
-  authVerify(req, res, next) {
+  async authVerify(req, res, next) {
+    try {
+      //TODO сделать эту проверку
+      //   const token = authHeader && authHeader.split(" ")[1];
 
-    //TODO сделать эту проверку
-    //   const token = authHeader && authHeader.split(" ")[1];
-    
-    if (req.headers.authorization) {
-      
-      jwt.verify(req.headers.authorization.split(' ')[1], tokenKey, (err, payload) => {
-        
-        if (err) next()
-        else if (payload) {
+      if (req.headers.authorization) {
+        const payload = await jwt.verify(req.headers.authorization.slice(7), tokenKey);
+        if (payload) {
           //TODO нет смысла делать постоянный запрос к БД имея токен, т.к. при проверке токена получаешь айди 
-          db.User.findOne({
+          const user = await db.User.findOne({
             where: {
-              user_login: req.body.login
+              id: payload.id
             }
-          }).then((user) => {
-            if (user.id === payload.id) {
-              req.user = user
-              next()
-            } else {
-              next()
-            }
-          }).catch((err) => {
-            if (!req.user) next()
           });
+          if (user) {
+            req.user = user
+            return next()
+          }
         }
-      })
+      } else {
+        return next()
+      }
+    } catch (error) {
+      // res.status(401).send()
+      return next(error)
     }
-    if (!req.user) next()
+
+    //  if (!req.user) next()
   },
   async authReg(login, password) {
     try {

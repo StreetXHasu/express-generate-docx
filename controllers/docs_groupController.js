@@ -1,20 +1,32 @@
 const db = require('../models');
-const Docs = require('../models/docs');
-const Docs_group = require('../models/docs_group');
-const User = require('../models/user');
-const { body, validationResult } = require('express-validator/check');
-const { sanitizeBody } = require('express-validator/filter');
-
 const docx = require('docx');
+
 const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun, UnderlineType } = docx;
 
 //список групп докментов
 exports.index = async function (req, res, next) {
-    const docs = await db.Docs_group.findAll({ limit: 10 });
+    try {
+        if (req.user) {
+            const docs = await db.Docs_group.findAll({
+                limit: 10
+            });
 
-    res.json({ msg: "Список групп документов", docs });
-    return;
-    res.render('auth_login', { title: 'Авторизация' });
+            return res.status(200).json({
+                user: req.user,
+                msg: "Список групп документов",
+                docs,
+
+            });
+        } else return res.status(200).json({
+            msg: 'Not authorized'
+        })
+        return;
+        res.render('auth_login', {
+            title: 'Авторизация'
+        });
+    } catch (error) {
+        return res.status(401).json(error);
+    }
 }
 exports.docs_group_create_post = async function (req, res, next) {
 

@@ -1,5 +1,5 @@
-const { body, validationResult } = require('express-validator/check');
-const { sanitizeBody } = require('express-validator/filter');
+const { body, validationResult } = require('express-validator');
+const { sanitizeBody } = require('express-validator');
 const Auth = require('../middleware/authenticateToken');
 
 exports.user_login_post = function (req, res) {
