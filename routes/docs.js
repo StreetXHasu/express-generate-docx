@@ -1,35 +1,28 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const docs_controller = require('../controllers/docsController');
-const docs_groupController = require('../controllers/docs_groupController');
+const docs_controller = require("../controllers/docsController");
+const docs_groupController = require("../controllers/docs_groupController");
 // Требующиеся модули контроллеров.
-router.post('/', docs_controller.index);
-router.get('/', docs_controller.index);
-router.post('/new', docs_controller.docs_create_post);
-router.get('/new', docs_controller.docs_create_post);
-router.post('/:id', docs_controller.docs_detail_post);
-router.get('/:id', docs_controller.docs_detail_post);
-router.post('/:id/edit/', docs_controller.docs_edit_post);
-router.get('/:id/edit/', docs_controller.docs_edit_post);
-router.post('/:id/del/', docs_controller.docs_del_post);
-router.get('/:id/del/', docs_controller.docs_del_post);
+router.post("/", docs_controller.index);
+router.post("/new", docs_controller.docs_create_post);
+router.post("/:id", docs_controller.docs_detail_post);
+router.post("/:id/edit/", docs_controller.docs_edit_post);
+router.post("/:id/del/", docs_controller.docs_del_post);
 
-router.post('/group/', docs_groupController.index);
-router.post('/group/new', docs_groupController.docs_group_create_post);
-router.post('/group/:id', docs_groupController.docs_group_detail_post);
-router.post('/group/:id/edit/', docs_groupController.docs_group_edit_post);
-router.post('/group/:id/del/', docs_groupController.docs_group_del_post);
+router.post("/group/", docs_groupController.index);
+router.post("/group/new", docs_groupController.docs_group_create_post);
+router.post("/group/:id", docs_groupController.docs_group_detail_post);
+router.post("/group/:id/edit/", docs_groupController.docs_group_edit_post);
+router.post("/group/:id/del/", docs_groupController.docs_group_del_post);
 
 module.exports = router;
 
-
 // router.get('/cool', function (req, res, next) {
 //   res.send('Мы крутые');
 // });
 // router.get('/cool', function (req, res, next) {
 //   res.send('Мы крутые');
 // });
-
 
 // router.get('/cool', function (req, res, next) {
 //   res.send('Мы крутые');
@@ -41,7 +34,7 @@ module.exports = router;
 
 // /// BOOK ROUTES МАРШРУТЫ КНИГ///
 
-// // GET catalog home page. 
+// // GET catalog home page.
 // router.get('/', book_controller.index);
 
 // // GET request for creating a Book. NOTE This must come before routes that display Book (uses id).
@@ -129,7 +122,7 @@ module.exports = router;
 // // GET-запрос для создания экземпляра книги. Должен появиться до маршрута, выводящего BookInstance с использованием id
 // router.get('/bookinstance/create', book_instance_controller.bookinstance_create_get);
 
-// // POST request for creating BookInstance. 
+// // POST request for creating BookInstance.
 // router.post('/bookinstance/create', book_instance_controller.bookinstance_create_post);
 
 // // GET request to delete BookInstance.
