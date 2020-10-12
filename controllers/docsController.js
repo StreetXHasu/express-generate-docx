@@ -41,7 +41,7 @@ exports.index = async function (req, res, next) {
 exports.docs_create_post = async function (req, res, next) {
   try {
     let doc_user = 1;
-    let doc_group = 1;
+    let doc_group = req.body.doc.groupId;
 
     let doc_name = req.body.doc.name;
     let doc_disc = req.body.doc.disc;
@@ -286,7 +286,6 @@ exports.docs_create_post = async function (req, res, next) {
   }
 };
 exports.docs_detail_post = async function (req, res, next) {
-  return next();
   try {
     let doc = await db.Docs.findOne({
       where: {

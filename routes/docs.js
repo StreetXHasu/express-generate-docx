@@ -3,17 +3,18 @@ const router = express.Router();
 const docs_controller = require("../controllers/docsController");
 const docs_groupController = require("../controllers/docs_groupController");
 // Требующиеся модули контроллеров.
-router.post("/", docs_controller.index);
-router.post("/new", docs_controller.docs_create_post);
-router.post("/:id", docs_controller.docs_detail_post);
-router.post("/:id/edit/", docs_controller.docs_edit_post);
-router.post("/:id/del/", docs_controller.docs_del_post);
 
 router.post("/group/", docs_groupController.index);
 router.post("/group/new", docs_groupController.docs_group_create_post);
 router.post("/group/:id", docs_groupController.docs_group_detail_post);
 router.post("/group/:id/edit/", docs_groupController.docs_group_edit_post);
 router.post("/group/:id/del/", docs_groupController.docs_group_del_post);
+
+router.post("/", docs_controller.index);
+router.post("/new", docs_controller.docs_create_post);
+router.post("/:id", docs_controller.docs_detail_post);
+router.post("/:id/edit/", docs_controller.docs_edit_post);
+router.post("/:id/del/", docs_controller.docs_del_post);
 
 module.exports = router;
 
