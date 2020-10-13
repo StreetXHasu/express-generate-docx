@@ -1,6 +1,7 @@
 const { body, validationResult } = require("express-validator");
 const { sanitizeBody } = require("express-validator");
 const Auth = require("../middleware/authenticateToken");
+const path = require("path");
 
 exports.user_login_post = function (req, res) {
   res.render("auth_login", { title: "Авторизация" });
@@ -19,4 +20,9 @@ exports.user_create_post = function (req, res) {
   }
 
   res.json({ msg: "готово" });
+};
+
+exports.upload = function (req, res, next) {
+  var filepath = path.join(__dirname, "../uploads/" + req.params.file);
+  res.sendFile(filepath);
 };

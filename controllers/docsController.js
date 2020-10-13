@@ -18,7 +18,7 @@ exports.index = async function (req, res, next) {
   try {
     if (req.user) {
       const docs = await db.Docs.findAll({
-        limit: 10,
+        limit: 50,
       });
 
       return res.status(200).json({

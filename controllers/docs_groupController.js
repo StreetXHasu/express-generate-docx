@@ -1,6 +1,5 @@
 const db = require("../models");
 const docx = require("docx");
-
 const {
   AlignmentType,
   Document,
@@ -38,9 +37,10 @@ exports.index = async function (req, res, next) {
 };
 exports.docs_group_create_post = async function (req, res, next) {
   try {
-    let doc_name = req.body.doc.name;
-    let doc_disc = req.body.doc.disc;
-    let doc_img = req.body.doc.img;
+    let doc_name = req.body.name;
+    let doc_disc = req.body.disc;
+    let doc_img = req.file;
+    let fileName = `${doc_img.destination}${doc_img.filename}`;
 
     const [doc, created] = await db.Docs_group.findOrCreate({
       where: {
@@ -48,7 +48,7 @@ exports.docs_group_create_post = async function (req, res, next) {
       },
       defaults: {
         disc: doc_disc,
-        img: doc_img,
+        img: fileName,
       },
     });
     let success = `Группа ${doc.name} уже есть.`;

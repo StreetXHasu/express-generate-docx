@@ -62,6 +62,7 @@ app.use("/api/auth", Auth.authLogin);
 // app.get('/', (req, res) => {
 //   res.send('Hello World!3333')
 // })
+app.use(express.static("uploads"));
 
 app.set("view engine", "pug");
 

@@ -3,9 +3,40 @@ const router = express.Router();
 const docs_controller = require("../controllers/docsController");
 const docs_groupController = require("../controllers/docs_groupController");
 // Требующиеся модули контроллеров.
+const multer = require("multer");
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
+
+function checkMultipart(req, res, next) {
+  const contentType = req.headers["content-type"];
+  // Make sure it's multipart/form
+  if (!contentType || !contentType.includes("multipart/form-data")) {
+    // Stop middleware chain and send a status
+    return res.sendStatus(500);
+  }
+  next();
+}
+function rewriter(req, res, next) {
+  // Set the request fields that you want
+  req.body.avatarUri = req.file.destination + req.file.filename;
+  next();
+}
 
 router.post("/group/", docs_groupController.index);
-router.post("/group/new", docs_groupController.docs_group_create_post);
+router.post(
+  "/group/new",
+  checkMultipart,
+  upload.single("avatar"),
+  rewriter,
+  docs_groupController.docs_group_create_post
+);
 router.post("/group/:id", docs_groupController.docs_group_detail_post);
 router.post("/group/:id/edit/", docs_groupController.docs_group_edit_post);
 router.post("/group/:id/del/", docs_groupController.docs_group_del_post);
