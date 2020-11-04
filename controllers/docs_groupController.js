@@ -24,8 +24,8 @@ exports.index = async function (req, res, next) {
         docs,
       });
     } else
-      return res.status(200).json({
-        msg: "Not authorized",
+      return res.status(403).json({
+        error: "Not authorized",
       });
     return;
     res.render("auth_login", {
@@ -37,6 +37,11 @@ exports.index = async function (req, res, next) {
 };
 exports.docs_group_create_post = async function (req, res, next) {
   try {
+    if (!req.user) {
+      return res.status(403).json({
+        error: "Not authorized",
+      });
+    }
     let doc_name = req.body.name;
     let doc_disc = req.body.disc;
     let doc_img = req.file;
@@ -83,9 +88,9 @@ exports.docs_group_detail_post = async function (req, res, next) {
   }
 };
 exports.docs_group_edit_post = async function (req, res, next) {
-  let doc_name = req.body.doc.name;
-  let doc_disc = req.body.doc.disc;
-  let doc_img = req.body.doc.img;
+  let doc_name = req.body.name;
+  let doc_disc = req.body.disc;
+  let doc_img = req.body.img;
   try {
     let doc_group = await db.Docs_group.findOne({
       where: { id: req.params.id },

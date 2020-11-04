@@ -6,7 +6,7 @@ var user_controller = require("../controllers/userController");
 router.get("/", function (req, res) {
   res.json({ msg: "лол, это главная" });
 });
-router.get("/upload/:file", user_controller.upload);
+router.get("/uploads/:file", user_controller.upload);
 router.post("/login", user_controller.user_login_post);
 router.post("/reg", user_controller.user_create_post);
 

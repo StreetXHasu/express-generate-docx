@@ -27,8 +27,8 @@ exports.index = async function (req, res, next) {
         docs,
       });
     } else
-      return res.status(200).json({
-        msg: "Not authorized",
+      return res.status(403).json({
+        error: "Not authorized",
       });
     return;
     res.render("auth_login", {
@@ -269,7 +269,7 @@ exports.docs_create_post = async function (req, res, next) {
     if (!errors.isEmpty()) {
       // There are errors. Render form again with sanitized values/errors messages.
       res.json({
-        msg: "ошибка",
+        error: "ошибка",
         user: req.body,
         errors: errors.array(),
       });

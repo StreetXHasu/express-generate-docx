@@ -9,16 +9,19 @@ module.exports = {
   async authLogin(req, res, next) {
     try {
       //console.log('Тест работает');
-      const myPlaintextPassword = req.body.password;
+      const userlogin = req.body.userlogin;
+      const userpassword = req.body.userpassword;
+
+      const myPlaintextPassword = userpassword;
 
       let user = await db.User.findOne({
         where: {
-          user_login: req.body.login,
+          user_login: userlogin,
         },
       });
       if (!user) {
         return res.status(200).json({
-          msg: "User not found",
+          message: "User not found",
         });
       }
       let check = await bcrypt.compare(myPlaintextPassword, user.user_password);
@@ -32,15 +35,7 @@ module.exports = {
           },
           tokenKey
         );
-        const [dbuser, created] = await db.User_session.findOrCreate({
-          where: {
-            userId: user.id,
-          },
-          defaults: {
-            token: token,
-            end: `${moment().add(1, "d").format("YYYY-MM-DD HH:mm:ss.SSS Z")}`,
-          },
-        });
+
         // console.log(user.user_name); // 'sdepold'
         // console.log(created); // The boolean indicating whether this instance was just created
         // if (created) {
@@ -64,7 +59,7 @@ module.exports = {
     } catch (error) {
       console.log(error);
     }
-    return res.status(404).json({
+    return res.status(200).json({
       message: "User not found",
     });
   },
@@ -115,6 +110,7 @@ module.exports = {
               user_password: hash,
             },
           });
+          return true;
           // console.log(user.user_name); // 'sdepold'
           // console.log(created); // The boolean indicating whether this instance was just created
           // if (created) {
@@ -132,6 +128,7 @@ module.exports = {
       // }
     } catch (error) {
       console.log(error);
+      return false;
     }
   },
 };
